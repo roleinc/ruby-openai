@@ -8,7 +8,11 @@ module OpenAI
     end
 
     def chat(parameters: {})
-      OpenAI::Client.json_post(path: "/chat/completions", parameters: parameters)
+      if parameters[:stream]
+        OpenAI::Client.stream_json_post(path: "/chat/completions", parameters: parameters)
+      else
+        OpenAI::Client.json_post(path: "/chat/completions", parameters: parameters)
+      end
     end
 
     def completions(parameters: {})
@@ -63,6 +67,15 @@ module OpenAI
         uri(path: path),
         headers: headers,
         body: parameters&.to_json
+      )
+    end
+
+    def self.stream_json_post(path:, parameters:)
+      HTTParty.post(
+        uri(path: path),
+        headers: headers,
+        body: parameters&.to_json,
+        stream_body: true
       )
     end
 
